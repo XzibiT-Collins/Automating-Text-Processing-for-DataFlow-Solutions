@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class RegexTextProcessor {
 
     //match and extract method
-    public List<String> matchPattern(String filePath, String regex) throws IOException {
+    public static List<String> matchPattern(String filePath, String regex) throws IOException {
         if(regex.isEmpty()){
             return Collections.emptyList();
         }
@@ -37,7 +37,7 @@ public class RegexTextProcessor {
     }
 
     //Search method
-    public List<String> search(String filePath, String regex) throws IOException{
+    public static List<String> search(String filePath, String regex) throws IOException{
         //compile pattern
         Pattern pattern = Pattern.compile(regex);
 
@@ -58,7 +58,7 @@ public class RegexTextProcessor {
     }
 
     //Replace text in file
-    public void replaceText(String filePath, String replacement,String regex)throws IOException{
+    public static void replaceText(String filePath, String replacement,String regex)throws IOException{
         Pattern pattern = Pattern.compile(regex);
 
         //read file
