@@ -1,16 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.automatedtextprocessing.HelloController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+<BorderPane stylesheets="@styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.automatedtextprocessing.HelloController">
+   <top>
+      <VBox spacing="10">
+         <padding>
+            <Insets bottom="10" left="20" right="20" top="20" />
+         </padding>
+
+         <Label styleClass="title" text="Regex Pattern Matcher">
+            <font>
+               <Font name="System Bold" size="18" />
+            </font>
+         </Label>
+
+         <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label styleClass="field-label" text="Pattern:" />
+            <TextField fx:id="regexPattern" promptText="Enter regex pattern..." HBox.hgrow="ALWAYS" />
+            <Button fx:id="search" onAction="#handleSearch" styleClass="action-button" text="Search" />
+            <Button fx:id="match" onAction="#handleFindMatch" styleClass="action-button" text="Find Matches" />
+            <Region maxWidth="10" HBox.hgrow="ALWAYS" />
+            <Button fx:id="uploadFile" onAction="#handleFileUpload" styleClass="upload-button" text="Upload File">
+               <tooltip>
+                  <Tooltip text="Upload a file to analyze" />
+               </tooltip>
+            </Button>
+         </HBox>
+
+         <Separator />
+      </VBox>
+   </top>
+
+   <center>
+      <VBox spacing="15">
+         <padding>
+            <Insets bottom="10" left="20" right="20" top="10" />
+         </padding>
+
+         <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label styleClass="section-header" text="Original File Content:" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="reset" onAction="#HandleFileContentReset" styleClass="secondary-button" text="Reset">
+               <tooltip>
+                  <Tooltip text="Clear all fields and start over" />
+               </tooltip>
+            </Button>
+         </HBox>
+
+         <!-- Side by side text areas -->
+         <HBox spacing="15" VBox.vgrow="ALWAYS">
+            <!-- Original content side -->
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+               <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="content-area" VBox.vgrow="ALWAYS">
+                  <TextArea fx:id="uploadedFileContent" styleClass="text-content" wrapText="true" />
+               </ScrollPane>
+            </VBox>
+
+            <!-- Updated content side -->
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+               <Label styleClass="section-header" text="Updated File Content:" />
+               <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="content-area" VBox.vgrow="ALWAYS">
+                  <TextArea fx:id="updatedFileContent" prefWidth="318.0" styleClass="text-content" wrapText="true" />
+               </ScrollPane>
+            </VBox>
+         </HBox>
+
+         <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label styleClass="field-label" text="Replacement:" />
+            <TextField fx:id="replacementText" promptText="Enter replacement text..." HBox.hgrow="ALWAYS" />
+            <Button fx:id="replace" onAction="#handleReplace" styleClass="action-button" text="Replace">
+               <tooltip>
+                  <Tooltip text="Replace all matches with the specified text" />
+               </tooltip>
+            </Button>
+            <Label styleClass="info-label" text="Match count:" />
+            <Label fx:id="frequency" styleClass="count-label" text="0" />
+         </HBox>
+      </VBox>
+   </center>
+
+   <bottom>
+      <ToolBar styleClass="status-bar">
+         <padding>
+            <Insets bottom="5" left="10" right="10" top="5" />
+         </padding>
+         <Label fx:id="statusLabel" text="Ready" />
+         <Region HBox.hgrow="ALWAYS" />
+         <Label styleClass="app-version" text="Regex Pattern Matcher v1.0" />
+      </ToolBar>
+   </bottom>
+</BorderPane>

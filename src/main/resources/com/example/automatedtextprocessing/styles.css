@@ -1,0 +1,144 @@
+/* Base styles */
+.root {
+  -fx-background-color: #f5f5f7;
+  -fx-font-family: "Segoe UI", Arial, sans-serif;
+  -fx-font-size: 13px;
+}
+
+/* Title styling */
+.title {
+  -fx-font-size: 22px;
+  -fx-font-weight: bold;
+  -fx-text-fill: #2d3748;
+}
+
+/* Labels */
+.field-label {
+  -fx-font-weight: normal;
+  -fx-text-fill: #4a5568;
+}
+
+.section-header {
+  -fx-font-size: 14px;
+  -fx-font-weight: bold;
+  -fx-text-fill: #2d3748;
+}
+
+.info-label {
+  -fx-text-fill: #4a5568;
+}
+
+.count-label {
+  -fx-font-weight: bold;
+  -fx-text-fill: #3182ce;
+}
+
+/* Text fields */
+.text-field {
+  -fx-background-color: white;
+  -fx-background-radius: 4px;
+  -fx-border-color: #e2e8f0;
+  -fx-border-radius: 4px;
+  -fx-padding: 8px;
+}
+
+.text-field:focused {
+  -fx-border-color: #3182ce;
+  -fx-effect: dropshadow(gaussian, rgba(49, 130, 206, 0.3), 4, 0, 0, 0);
+}
+
+/* Text areas */
+.text-content {
+  -fx-background-color: white;
+  -fx-border-color: #e2e8f0;
+  -fx-border-radius: 4px;
+  -fx-background-radius: 4px;
+  -fx-font-family: "Consolas", "Monaco", monospace;
+  -fx-font-size: 13px;
+}
+
+.content-area {
+  -fx-background-color: transparent;
+  -fx-background-insets: 0;
+  -fx-padding: 0;
+}
+
+.content-area > .viewport {
+  -fx-background-color: transparent;
+}
+
+/* Buttons */
+.button {
+  -fx-background-radius: 4px;
+  -fx-padding: 8px 12px;
+  -fx-cursor: hand;
+  -fx-font-weight: normal;
+}
+
+.action-button {
+  -fx-background-color: #3182ce;
+  -fx-text-fill: white;
+}
+
+.action-button:hover {
+  -fx-background-color: #2c5282;
+}
+
+.secondary-button {
+  -fx-background-color: #e2e8f0;
+  -fx-text-fill: #4a5568;
+}
+
+.secondary-button:hover {
+  -fx-background-color: #cbd5e0;
+}
+
+.upload-button {
+  -fx-background-color: #38a169;
+  -fx-text-fill: white;
+}
+
+.upload-button:hover {
+  -fx-background-color: #2f855a;
+}
+
+/* Status bar */
+.status-bar {
+  -fx-background-color: #e2e8f0;
+  -fx-border-width: 1 0 0 0;
+  -fx-border-color: #cbd5e0;
+}
+
+.app-version {
+  -fx-text-fill: #718096;
+  -fx-font-size: 12px;
+}
+
+/* Separator */
+.separator {
+  -fx-opacity: 0.7;
+}
+
+/* Scroll bars */
+.scroll-bar {
+  -fx-background-color: transparent;
+  -fx-background-radius: 2em;
+}
+
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-background-radius: 2em;
+}
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+  -fx-background-color: #a0aec0;
+  -fx-background-radius: 2em;
+}
+
+.scroll-bar:horizontal .thumb:hover,
+.scroll-bar:vertical .thumb:hover {
+  -fx-background-color: #718096;
+}
