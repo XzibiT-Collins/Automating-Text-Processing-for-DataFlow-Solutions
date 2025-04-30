@@ -4,9 +4,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import com.example.automatedtextprocessing.FileAnalysis.StreamProcessing;
 import com.example.automatedtextprocessing.FileProcessing.ReadAndWrite;
 import com.example.automatedtextprocessing.RegexProcessing.RegexTextProcessor;
 import javafx.event.ActionEvent;
@@ -93,6 +95,27 @@ public class HelloController {
 
                 String content = String.join("\n",lines);
                 uploadedFileContent.setText(content);
+
+                //upload summary of file to textarea
+                List<Map.Entry<String,Long>> dict = StreamProcessing.wordSummary(selectedFile.getPath(),10);
+
+                //Stringbuilder to hold summary
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("SUMMARY OF FILE \n")
+                        .append(String.format("%-15s %10s%n","WORD","COUNT"));
+
+                if(!lines.isEmpty()){
+                    for(Map.Entry<String , Long> entry:dict){
+                        stringBuilder
+                                .append(String.format("%-15s:%10s%n",entry.getKey(),entry.getValue()));
+
+                    }
+
+                    //display summary to user
+                    updatedFileContent.setText(stringBuilder.toString());
+                }
+
+
             }catch (IOException e){
                 logger.info("File Error: "+ e.getMessage());
                 showAlert("File Error","Selected file is corrupt.", Alert.AlertType.ERROR);
@@ -111,7 +134,27 @@ public class HelloController {
 
         String regex = regexPattern.getText();
         if(!regex.isBlank()){
+            try{
+                logger.info("Started pattern matching.");
+                List<String> lines = RegexTextProcessor.matchPattern(selectedFile.getPath(),regex);
 
+                if(lines.isEmpty()){
+                    showAlert("INFO","No match found.",Alert.AlertType.INFORMATION);
+                    return;
+                }
+                for(String line: lines){
+                    logger.info(""+line+"\n");
+                }
+                String content = String.join("\n", lines);
+
+                //Display matches
+                updatedFileContent.setText(content);
+
+//                showAlert("Results","Match Found for : "+ regex,Alert.AlertType.CONFIRMATION);
+            }catch (IOException e){
+                logger.info("Error matching File: "+ e.getMessage());
+                showAlert("Error","Error matching pattern.", Alert.AlertType.ERROR);
+            }
         }
     }
 
@@ -125,13 +168,52 @@ public class HelloController {
             return;
         }
 
+        if(selectedFile != null){
+            try{
+                RegexTextProcessor.replaceText(selectedFile.getPath(),replacement,pattern); //Replace text
+
+                //Prompt user
+                showAlert("INFO","File updated successfully.", Alert.AlertType.INFORMATION);
+
+                //Display updated file to user
+                List<String> lines = ReadAndWrite.readFile(selectedFile.getPath());
+
+                String content = String.join("\n",lines);
+                uploadedFileContent.setText(content);
+
+            }catch (IOException e){
+                showAlert("Error","Couldn't replace item.", Alert.AlertType.ERROR);
+                logger.info("Error while writing to file: "+ e.getMessage());
+            }
+        }
+
         //replace pattern with replacement text
 
     }
 
     @FXML
     void handleSearch(ActionEvent event) {
+        String regex = regexPattern.getText();
 
+        if(regex.isBlank()){
+            showAlert("Warning", "Pattern cannot be blank.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        if(selectedFile != null){
+            try{
+                List<String> lines = RegexTextProcessor.search(selectedFile.getPath(),regex);
+                showAlert("INFO", "Results found!", Alert.AlertType.INFORMATION);
+
+                //display results to user
+                String content = String.join("\n",lines);
+                updatedFileContent.setText(content);
+
+            }catch (IOException e){
+                logger.info("An error occurred while searching: "+ e.getMessage());
+                showAlert("Error", "An error occurred while searching for pattern.", Alert.AlertType.ERROR);
+            }
+        }
     }
 
     @FXML
