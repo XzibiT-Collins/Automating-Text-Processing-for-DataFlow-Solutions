@@ -19,7 +19,7 @@ public class StreamProcessing {
 
         //use streams for word count
         return lines.stream().flatMap(
-                line -> Arrays.stream(line.toLowerCase().replaceAll("[a-zA-Z0-9\\s]","").split("\\s+")) //remove punctuations and empty spaces.
+                line -> Arrays.stream(line.toLowerCase().replaceAll("[^\\w\\s]","").split("\\s+")) //remove punctuations and empty spaces.
         ).filter(
                 word -> !word.isBlank()
         ).collect(Collectors.groupingBy(Function.identity(),Collectors.counting()));
