@@ -1,22 +1,30 @@
 package com.example.automatedtextprocessing;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import com.example.automatedtextprocessing.DataManager.Document;
+import com.example.automatedtextprocessing.DataManager.DocumentManager;
 import com.example.automatedtextprocessing.FileAnalysis.StreamProcessing;
 import com.example.automatedtextprocessing.FileProcessing.ReadAndWrite;
 import com.example.automatedtextprocessing.RegexProcessing.RegexTextProcessor;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import javax.swing.*;
 
 public class HelloController {
 
@@ -59,12 +67,19 @@ public class HelloController {
     @FXML
     private TextArea uploadedFileContent;
 
+    @FXML
+    private ListView<String> recentFilesList;
+
+    private ObservableList<String> documentIds;
+
     //Declare File
     private File selectedFile;
 
     //logger
     private static final Logger logger = Logger.getLogger(HelloController.class.getName());
 
+    //Database for documents uploaded by user
+    private final DocumentManager database = new DocumentManager();
 
     @FXML
     void HandleFileContentReset(ActionEvent event) {
@@ -104,6 +119,15 @@ public class HelloController {
 
                 String content = String.join("\n",lines);
                 uploadedFileContent.setText(content);
+
+
+                //Add file to data manager
+                String docContent = String.join("\n",lines); // convert lines to string
+                Document newDoc = new Document(file.getName(),file.getName(),docContent); //create document object
+                database.addDocument(newDoc); //add document to database
+
+                //update recentFile list
+                documentIds.add(newDoc.getId());
 
                 //upload summary of file to textarea
                 List<Map.Entry<String,Long>> dict = StreamProcessing.wordSummary(selectedFile.getPath(),10);
@@ -172,6 +196,39 @@ public class HelloController {
             }catch (IOException e){
                 logger.info("Error matching File: "+ e.getMessage());
                 showAlert("Error","Error matching pattern.", Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    @FXML
+    void handlePatternRecognition(ActionEvent event){
+        String pattern = regexPattern.getText();
+
+        if(pattern.isBlank()){
+            showAlert("Warning","Pattern cannot be empty",Alert.AlertType.WARNING);
+        }
+
+        //check for patterns
+        if(selectedFile != null){
+            try{
+                List<String> lines = StreamProcessing.patternRecognition(selectedFile.getPath(),pattern);
+
+                //display patterns to user
+                if(lines.isEmpty()){
+                    showAlert("INFO","No patterns found.", Alert.AlertType.INFORMATION);
+                }
+
+                //update content
+                String content = String.join("\n",lines);
+                updatedFileContent.setText(content);
+
+                //update count
+                long count = StreamProcessing.countPatternOccurrence(selectedFile.getPath(),pattern);
+                updateMatchCount(count);
+
+            }catch (IOException e){
+                logger.info("Error finding patterns in document.: "+ e.getMessage());
+                showAlert("Error","Failed to check for patterns.", Alert.AlertType.ERROR);
             }
         }
     }
@@ -249,6 +306,45 @@ public class HelloController {
         }
     }
 
+    void handleDocumentSelection(String selectedId){
+        if(selectedId != null){
+            Document doc = database.getDocument(selectedId);
+            if(doc != null){
+                uploadedFileContent.setText(doc.getContent()); //display document content
+
+                //update summary also
+                try{
+                    //create a temporary file
+                    Path tempFile = Files.createTempFile("tempFile.txt", ".txt");
+                    Files.write(tempFile,doc.getContent().getBytes());
+                    //get summary
+                    List<Map.Entry<String,Long>> summary = StreamProcessing.wordSummary(tempFile.toString(),10);
+
+                    //Stringbuilder to hold summary
+                    StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append("SUMMARY OF FILE TOP 10\n")
+                            .append(String.format("%-15s %10s%n","WORD","COUNT"));
+
+                    for(Map.Entry<String , Long> entry:summary){
+                        stringBuilder
+                                .append(String.format("%-15s:%10s%n",entry.getKey(),entry.getValue()));
+
+                    }
+
+                    //display summary to user
+                    updatedFileContent.setText(stringBuilder.toString());
+
+                    //update selected file
+                    selectedFile = tempFile.toFile(); //convert the path to a file
+
+                }catch (IOException e){
+                    logger.info("Error creating Temporary File: " + e.getMessage());
+                    showAlert("Error","Unable to get File summary", Alert.AlertType.ERROR);
+                }
+            }
+        }
+    }
+
     @FXML
     void initialize() {
         assert frequency != null : "fx:id=\"frequency\" was not injected: check your FXML file 'hello-view.fxml'.";
@@ -263,6 +359,63 @@ public class HelloController {
         assert uploadFile != null : "fx:id=\"uploadFile\" was not injected: check your FXML file 'hello-view.fxml'.";
         assert uploadedFileContent != null : "fx:id=\"uploadedFileContent\" was not injected: check your FXML file 'hello-view.fxml'.";
 
+        documentIds = FXCollections.observableArrayList();
+        //Load all documents
+        List<Document> documents = database.getAllDocuments();
+
+        for(Document doc : documents){
+            documentIds.add(doc.getId());
+        }
+
+        //set items in listview
+        recentFilesList.setItems(documentIds);
+
+        //Handle Mouse Click on ListView
+        recentFilesList.setOnMouseClicked(event -> {
+            String selectedFileId = recentFilesList.getSelectionModel().getSelectedItem();
+
+            if(selectedFileId == null){
+                return;
+            }
+            if(event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 1){
+                //load file
+                handleDocumentSelection(selectedFileId);
+            }else if(event.getButton() == MouseButton.SECONDARY){
+                //show context menu
+                ContextMenu contextMenu = new ContextMenu();
+
+                MenuItem deleteItem = getMenuItem(selectedFileId);
+                contextMenu.getItems().add(deleteItem);
+                contextMenu.show(recentFilesList,event.getScreenX(),event.getScreenY());
+            }
+
+        });
+
+    }
+
+    private MenuItem getMenuItem(String selectedFileId) {
+        MenuItem deleteItem = new MenuItem("Delete file");
+
+        deleteItem.setOnAction(event1 -> {
+
+            //delete document from database
+            boolean deleted = database.deleteDocument(selectedFileId);
+            if(deleted){
+                showAlert("INFO","File Deleted.", Alert.AlertType.INFORMATION);
+                logger.info("INFO: File deleted: "+ selectedFileId);
+
+                //remove deleted item from list
+                documentIds.remove(selectedFileId);
+
+                //clear text areas
+                clearOutput();
+                clearUpload();
+
+            }else{
+                showAlert("Error","Unable to delete File.", Alert.AlertType.ERROR);
+            }
+        });
+        return deleteItem;
     }
 
     //Alert

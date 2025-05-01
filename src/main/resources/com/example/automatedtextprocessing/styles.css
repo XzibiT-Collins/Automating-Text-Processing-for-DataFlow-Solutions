@@ -142,3 +142,23 @@
 .scroll-bar:vertical .thumb:hover {
   -fx-background-color: #718096;
 }
+
+.recent-files-list {
+    -fx-background-color: #f8f8f8;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 4px;
+}
+
+.recent-files-list .list-cell {
+    -fx-padding: 8px;
+    -fx-background-color: transparent;
+}
+
+.recent-files-list .list-cell:hover {
+    -fx-background-color: #f0f0f0;
+}
+
+.recent-files-list .list-cell:selected {
+    -fx-background-color: #e0e0e0;
+    -fx-text-fill: black;
+}
