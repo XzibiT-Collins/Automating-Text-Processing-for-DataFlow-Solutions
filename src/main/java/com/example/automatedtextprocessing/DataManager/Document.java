@@ -28,7 +28,7 @@ public class Document {
     public void setTitle(String newTitle){
         if(newTitle.isEmpty()){
             //throw custom error
-            return;
+            throw new  IllegalArgumentException("Title cannot be blank");
         }
         this.title = newTitle;
     }
