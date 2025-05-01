@@ -69,12 +69,20 @@ public class HelloController {
     @FXML
     void HandleFileContentReset(ActionEvent event) {
         //clear textarea
-        uploadedFileContent.setText("");
-        updatedFileContent.setText("");
+        clearUpload();
+        clearOutput();
+
+        //set selected file to null
+        selectedFile = null;
     }
 
     @FXML
     void handleFileUpload(ActionEvent event) {
+        //clear bot upload and output textarea
+        clearOutput();
+        clearUpload();
+
+        //Accept file from GUI
         FileChooser fileChooser = new FileChooser();//new file chooser
         fileChooser.setTitle("Select a file to process."); //Sets title of window
         fileChooser.getExtensionFilters().add(
@@ -88,6 +96,7 @@ public class HelloController {
 
         selectedFile = file; //set selected variable to current file
 
+        //Process file
         if(file != null){
             //Read file
             try{
@@ -101,7 +110,7 @@ public class HelloController {
 
                 //Stringbuilder to hold summary
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("SUMMARY OF FILE \n")
+                stringBuilder.append("SUMMARY OF FILE TOP 10\n")
                         .append(String.format("%-15s %10s%n","WORD","COUNT"));
 
                 if(!lines.isEmpty()){
@@ -127,6 +136,9 @@ public class HelloController {
 
     @FXML
     void handleFindMatch(ActionEvent event) {
+        //clear previous text in updated textarea
+        clearOutput();
+
         if(selectedFile == null){
             showAlert("Error","Please select a file to proceed.", Alert.AlertType.ERROR);
             return;
@@ -150,7 +162,13 @@ public class HelloController {
                 //Display matches
                 updatedFileContent.setText(content);
 
-//                showAlert("Results","Match Found for : "+ regex,Alert.AlertType.CONFIRMATION);
+                //update match count
+                try{
+                    long count = StreamProcessing.countPatternOccurrence(selectedFile.getPath(),regex);
+                    updateMatchCount(count); //update value
+                }catch (IOException a){
+                    logger.info("Error: " + a.getMessage());
+                }
             }catch (IOException e){
                 logger.info("Error matching File: "+ e.getMessage());
                 showAlert("Error","Error matching pattern.", Alert.AlertType.ERROR);
@@ -181,18 +199,21 @@ public class HelloController {
                 String content = String.join("\n",lines);
                 uploadedFileContent.setText(content);
 
+                //clear previous output
+                clearOutput();
+
             }catch (IOException e){
                 showAlert("Error","Couldn't replace item.", Alert.AlertType.ERROR);
                 logger.info("Error while writing to file: "+ e.getMessage());
             }
         }
-
-        //replace pattern with replacement text
-
     }
 
     @FXML
     void handleSearch(ActionEvent event) {
+        //clear previous text in textarea
+        clearOutput();
+
         String regex = regexPattern.getText();
 
         if(regex.isBlank()){
@@ -200,6 +221,7 @@ public class HelloController {
             return;
         }
 
+        //Search pattern occurrence
         if(selectedFile != null){
             try{
                 List<String> lines = RegexTextProcessor.search(selectedFile.getPath(),regex);
@@ -209,10 +231,21 @@ public class HelloController {
                 String content = String.join("\n",lines);
                 updatedFileContent.setText(content);
 
+                //Update match count
+                try{
+                    long count = StreamProcessing.countPatternOccurrence(selectedFile.getPath(),regex);
+                    updateMatchCount(count); //update value
+                }catch (IOException a){
+                    logger.info("Error: " + a.getMessage());
+                }
+
             }catch (IOException e){
                 logger.info("An error occurred while searching: "+ e.getMessage());
                 showAlert("Error", "An error occurred while searching for pattern.", Alert.AlertType.ERROR);
             }
+        }else{
+            logger.info("Error: No file selected for search operation");
+            showAlert("Error","Please select a file to proceed.", Alert.AlertType.ERROR);
         }
     }
 
@@ -239,5 +272,21 @@ public class HelloController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    //Update match count
+    public void updateMatchCount(long count){
+        //set count label
+        frequency.setText(String.valueOf(count));
+    }
+
+    //Clear output
+    public void clearOutput(){
+        updatedFileContent.setText("");
+    }
+
+    //clear input
+    public void clearUpload(){
+        uploadedFileContent.setText("");
     }
 }
