@@ -5,7 +5,7 @@ public class Document {
     String title;
     String content;
 
-    Document(String id,String title, String content){
+    public Document(String id, String title, String content){
         this.id = id;
         this.title = title;
         this.content = content;

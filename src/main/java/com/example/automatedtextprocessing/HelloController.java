@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import com.example.automatedtextprocessing.DataManager.Document;
+import com.example.automatedtextprocessing.DataManager.DocumentManager;
 import com.example.automatedtextprocessing.FileAnalysis.StreamProcessing;
 import com.example.automatedtextprocessing.FileProcessing.ReadAndWrite;
 import com.example.automatedtextprocessing.RegexProcessing.RegexTextProcessor;
@@ -65,6 +67,8 @@ public class HelloController {
     //logger
     private static final Logger logger = Logger.getLogger(HelloController.class.getName());
 
+    //Database for documents uploaded by user
+    private final DocumentManager database = new DocumentManager();
 
     @FXML
     void HandleFileContentReset(ActionEvent event) {
@@ -104,6 +108,13 @@ public class HelloController {
 
                 String content = String.join("\n",lines);
                 uploadedFileContent.setText(content);
+
+
+                //Add file to data manager
+                String docContent = String.join("\n",lines); // convert lines to string
+                Document newDoc = new Document(file.getName(),file.getName(),docContent); //create document object
+                database.addDocument(newDoc); //add document to database
+
 
                 //upload summary of file to textarea
                 List<Map.Entry<String,Long>> dict = StreamProcessing.wordSummary(selectedFile.getPath(),10);
