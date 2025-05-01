@@ -240,5 +240,4 @@ public class HelloController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
 }
