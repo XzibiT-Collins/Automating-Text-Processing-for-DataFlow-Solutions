@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -47,5 +48,25 @@ public class StreamProcessing {
                 .sorted(Map.Entry.<String,Long>comparingByValue(Comparator.reverseOrder())) //sort highest frequency first
                 .limit(n)
                 .collect(Collectors.toList());
+    }
+
+    //Count occurrence of a matched pattern
+    public static long countPatternOccurrence(String filePath, String regex)throws IOException{
+        Pattern pattern = Pattern.compile(regex);
+
+        //Read file
+        List<String> lines = ReadAndWrite.readFile(filePath);
+
+        return lines.stream()
+                .mapToLong(line -> {
+                    //create matcher
+                    Matcher matcher = pattern.matcher(line);
+                    long count = 0;
+
+                    while(matcher.find()){
+                        count ++; //increment occurrence of pattern
+                    }
+                    return count;
+                }).sum(); //sum count value for each line
     }
 }
